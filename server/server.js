@@ -1,23 +1,23 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public")); // Serve static files
+// Serve static files from 'public' (adjust path)
+app.use(express.static(path.join(__dirname, "../public")));
 
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    // Listen for login event
     socket.on("login", (username) => {
-        socket.username = username; // Store username in socket
+        socket.username = username;
         console.log(`${username} joined the chat`);
     });
 
-    // Listen for messages
     socket.on("chat message", (message) => {
         const timestamp = new Date().toLocaleTimeString();
         io.emit("chat message", {
@@ -32,6 +32,8 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+// Start server
+const PORT = 3000;
+server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
