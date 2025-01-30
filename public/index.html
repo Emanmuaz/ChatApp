@@ -3,38 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App </title>
     <link rel="stylesheet" href="style.css">
+    <title>Chat App </title>
+    
 </head>
 <body>
-    <h2>Chat App </h2>
-    <input id="username" type="text" placeholder="Enter your username">
-    <br>
-    <div id="chat-box"></div>
-    <input id="message" type="text" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
+    <div id="login-container">
+        <h2>Enter Your Name</h2>
+        <input id="username" type="text" placeholder="Your name...">
+        <button onclick="login()">Join Chat</button>
+    </div>
+
+    <div id="chat-container" style="display: none;">
+        <h2>Chat Room</h2>
+        <div id="chat-box"></div>
+        <input id="message" type="text" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const chatBox = document.getElementById("chat-box");
-        const messageInput = document.getElementById("message");
-        const usernameInput = document.getElementById("username");
+        let username = "";
 
-        function sendMessage() {
-            const username = usernameInput.value.trim();
-            const message = messageInput.value.trim();
+        function login() {
+            username = document.getElementById("username").value.trim();
             if (!username) {
                 alert("Please enter a username.");
                 return;
             }
+            socket.emit("login", username);
+            document.getElementById("login-container").style.display = "none";
+            document.getElementById("chat-container").style.display = "block";
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("message");
+            const message = messageInput.value.trim();
             if (message) {
-                socket.emit("chat message", { username, message });
+                socket.emit("chat message", message);
                 messageInput.value = "";
             }
         }
 
         socket.on("chat message", ({ username, message, timestamp }) => {
+            const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("div");
             messageElement.classList.add("message");
             messageElement.innerHTML = `<strong>${username}</strong>: ${message} <br> <span class="timestamp">${timestamp}</span>`;

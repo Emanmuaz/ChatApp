@@ -6,15 +6,25 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static("public")); // Serve static files from 'public' folder
+app.use(express.static("public")); // Serve static files
 
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    // Listen for messages from clients
-    socket.on("chat message", ({ username, message }) => {
+    // Listen for login event
+    socket.on("login", (username) => {
+        socket.username = username; // Store username in socket
+        console.log(`${username} joined the chat`);
+    });
+
+    // Listen for messages
+    socket.on("chat message", (message) => {
         const timestamp = new Date().toLocaleTimeString();
-        io.emit("chat message", { username, message, timestamp });
+        io.emit("chat message", {
+            username: socket.username || "Anonymous",
+            message,
+            timestamp,
+        });
     });
 
     socket.on("disconnect", () => {
