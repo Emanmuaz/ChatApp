@@ -1,4 +1,5 @@
 const socket = io();
+
 let username = "";
 
 function login() {
